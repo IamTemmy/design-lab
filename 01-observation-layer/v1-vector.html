@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T. ADESOLA — OBSERVATION LAYER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A1626;
+    --horizon:#132437;
+    --panel:#182B41;
+    --dust:#C2AF98;
+    --bone:#E8F1F7;
+    --mag:#FF2D7A;
+    --cy:#22E0F0;
+    --lime:#9BF03C;
+    --amber:#FF8A3D;
+    --hair:rgba(34,224,240,.18);
+    --hair2:rgba(255,45,122,.16);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--dust);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- ambient overlays ---------- */
+  .grain{
+    position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.055;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scan{
+    position:fixed;inset:0;z-index:91;pointer-events:none;opacity:.35;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 3px,rgba(0,0,0,.22) 3px 4px);
+    mix-blend-mode:multiply;
+  }
+  .sweep{
+    position:fixed;left:0;right:0;height:180px;z-index:92;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(34,224,240,.05) 45%,rgba(34,224,240,.11) 50%,rgba(34,224,240,.05) 55%,transparent);
+    animation:sweepMove 9s linear infinite;
+  }
+  @keyframes sweepMove{0%{top:-20%}100%{top:120%}}
+
+  /* ---------- fixed HUD chrome ---------- */
+  .chrome{position:fixed;inset:0;z-index:80;pointer-events:none}
+  .brk{position:absolute;width:26px;height:26px;border:1px solid var(--cy);opacity:.55}
+  .brk.tl{top:14px;left:14px;border-right:0;border-bottom:0}
+  .brk.tr{top:14px;right:14px;border-left:0;border-bottom:0}
+  .brk.bl{bottom:14px;left:14px;border-right:0;border-top:0}
+  .brk.br{bottom:14px;right:14px;border-left:0;border-top:0}
+
+  .rail{
+    position:absolute;top:64px;bottom:64px;width:132px;
+    font-family:'Space Mono',monospace;font-size:8.5px;line-height:1.85;
+    color:rgba(34,224,240,.34);overflow:hidden;letter-spacing:.02em;
+    white-space:pre;
+  }
+  .rail.l{left:16px}
+  .rail.r{right:16px;text-align:right;color:rgba(255,45,122,.30)}
+
+  .stamp{
+    position:absolute;font-family:'Space Mono',monospace;font-size:9px;
+    letter-spacing:.18em;color:rgba(232,241,247,.45);
+  }
+  .stamp.top{top:20px;left:50%;transform:translateX(-50%)}
+  .stamp.bot{bottom:20px;left:50%;transform:translateX(-50%)}
+
+  /* ---------- shell ---------- */
+  .shell{position:relative;z-index:10;max-width:1080px;margin:0 auto;padding:0 28px}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;min-height:100vh;display:flex;flex-direction:column;
+    justify-content:center;padding:120px 0 80px;
+  }
+  .heroArt{
+    position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  }
+  .heroArt svg{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:1400px;max-width:none;opacity:.9}
+
+  .kicker{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.34em;
+    color:var(--cy);text-transform:uppercase;margin-bottom:22px;position:relative;z-index:2;
+  }
+  .kicker b{color:var(--lime);font-weight:400}
+
+  h1{
+    font-family:'Saira Condensed',sans-serif;font-weight:900;
+    font-size:clamp(52px,11.5vw,148px);line-height:.82;letter-spacing:-.015em;
+    text-transform:uppercase;color:var(--bone);margin:0 0 26px;position:relative;z-index:2;
+  }
+  h1 .l2{display:block;color:var(--dust)}
+  .aberr{
+    text-shadow:
+      -2px 0 rgba(255,45,122,.55),
+      2px 0 rgba(34,224,240,.55);
+  }
+  .glitching{animation:jitter .18s steps(2) 3}
+  @keyframes jitter{
+    0%{transform:translate(0,0)}
+    25%{transform:translate(-2px,1px)}
+    50%{transform:translate(2px,-1px)}
+    75%{transform:translate(-1px,-1px)}
+    100%{transform:translate(0,0)}
+  }
+
+  .heroMeta{
+    position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:10px 26px;
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.09em;
+    color:rgba(194,175,152,.8);max-width:660px;
+  }
+  .heroMeta span{display:flex;align-items:center;gap:8px}
+  .heroMeta i{width:5px;height:5px;background:var(--lime);display:block;font-style:normal;flex:0 0 auto}
+  .heroMeta .m{background:var(--mag)}
+  .heroMeta .c{background:var(--cy)}
+
+  .heroLine{
+    position:relative;z-index:2;margin:34px 0 0;max-width:520px;
+    font-size:15px;line-height:1.75;color:rgba(194,175,152,.92);
+  }
+
+  /* floating detection boxes in hero */
+  .fbox{
+    position:absolute;border:1px solid;pointer-events:none;z-index:1;
+    animation:fboxIn .7s cubic-bezier(.2,.9,.2,1) both;
+  }
+  .fbox::after{
+    content:attr(data-l);position:absolute;top:-14px;left:0;
+    font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;white-space:nowrap;
+  }
+  @keyframes fboxIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+  /* ---------- section rhythm ---------- */
+  .sec{padding:110px 0;position:relative}
+  .secHead{display:flex;align-items:baseline;gap:16px;margin-bottom:14px}
+  .secNum{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.22em;
+    color:var(--mag);flex:0 0 auto;
+  }
+  .secHead h2{
+    font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(26px,4vw,44px);letter-spacing:.01em;color:var(--bone);margin:0;line-height:1;
+  }
+  .secRule{height:1px;background:linear-gradient(90deg,var(--hair),transparent);margin-bottom:44px}
+
+  .lede{max-width:600px;font-size:15.5px;line-height:1.8;color:rgba(194,175,152,.9);margin:0 0 8px}
+  .lede + .lede{margin-top:18px}
+
+  /* ---------- observation cards ---------- */
+  .obsGrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:8px}
+
+  .obs{
+    position:relative;background:linear-gradient(180deg,var(--horizon),var(--void));
+    border:1px solid rgba(34,224,240,.12);padding:26px 26px 24px;
+    transition:border-color .35s ease;
+  }
+  .obs:hover{border-color:rgba(34,224,240,.34)}
+
+  .obs .cnr{position:absolute;width:12px;height:12px;border:1px solid var(--cy);opacity:0;transition:opacity .4s ease}
+  .obs .cnr.a{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .obs .cnr.b{top:-1px;right:-1px;border-left:0;border-bottom:0}
+  .obs .cnr.c{bottom:-1px;left:-1px;border-right:0;border-top:0}
+  .obs .cnr.d{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  .obs.det .cnr{opacity:.9}
+
+  .obsTag{
+    position:absolute;top:-9px;left:18px;background:var(--void);padding:0 8px;
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.16em;
+    color:var(--lime);opacity:0;transform:translateY(4px);transition:all .45s ease .1s;
+  }
+  .obs.det .obsTag{opacity:1;transform:translateY(0)}
+
+  .obsConf{
+    position:absolute;top:-9px;right:18px;background:var(--void);padding:0 8px;
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;
+    color:rgba(34,224,240,.75);opacity:0;transition:opacity .45s ease .25s;
+  }
+  .obs.det .obsConf{opacity:1}
+
+  .obsTop{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+  .obs h3{
+    font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(20px,2.6vw,30px);letter-spacing:.01em;color:var(--bone);margin:0 0 4px;line-height:1.05;
+  }
+  .obsRole{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;
+    color:var(--amber);text-transform:uppercase;
+  }
+  .obsBody{margin:16px 0 0;font-size:14.5px;line-height:1.75;color:rgba(194,175,152,.88);max-width:640px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+  .chip{
+    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.09em;
+    padding:4px 9px;border:1px solid rgba(194,175,152,.22);color:rgba(194,175,152,.72);
+  }
+
+  /* ---------- systems readout ---------- */
+  .readout{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;
+    background:rgba(34,224,240,.12);border:1px solid rgba(34,224,240,.12);
+  }
+  .cell{background:var(--void);padding:22px 20px}
+  .cell dt{
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;
+    color:var(--cy);text-transform:uppercase;margin-bottom:12px;
+  }
+  .cell dd{margin:0;font-size:13.5px;line-height:1.85;color:rgba(194,175,152,.9)}
+  .cell dd span{display:block}
+
+  /* ---------- transmission ---------- */
+  .tx{
+    border:1px solid rgba(255,45,122,.28);padding:44px 34px;position:relative;
+    background:linear-gradient(180deg,rgba(255,45,122,.05),transparent 60%);
+  }
+  .txLabel{
+    position:absolute;top:-9px;left:24px;background:var(--void);padding:0 10px;
+    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--mag);
+  }
+  .tx h2{
+    font-family:'Saira Condensed',sans-serif;font-weight:900;text-transform:uppercase;
+    font-size:clamp(30px,6vw,66px);line-height:.9;color:var(--bone);margin:0 0 18px;
+  }
+  .tx p{max-width:460px;font-size:15px;line-height:1.75;margin:0 0 30px;color:rgba(194,175,152,.9)}
+  .links{display:flex;flex-wrap:wrap;gap:10px}
+  .lk{
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-decoration:none;
+    color:var(--bone);border:1px solid rgba(232,241,247,.22);padding:13px 20px;
+    display:inline-flex;align-items:center;gap:10px;transition:all .2s ease;
+  }
+  .lk:hover{border-color:var(--cy);color:var(--cy);background:rgba(34,224,240,.06)}
+  .lk:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+  .lk em{font-style:normal;color:var(--mag)}
+
+  footer{
+    padding:52px 0 70px;font-family:'Space Mono',monospace;font-size:9.5px;
+    letter-spacing:.14em;color:rgba(194,175,152,.42);
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    border-top:1px solid rgba(34,224,240,.1);margin-top:40px;
+  }
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+  .rv.in{opacity:1;transform:none}
+
+  @media (max-width:760px){
+    .rail{display:none}
+    .sec{padding:78px 0}
+    .tx{padding:34px 22px}
+    .heroArt svg{width:900px;opacity:.55}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .sweep{animation:none;display:none}
+    .glitching{animation:none}
+    .rv{transition:none;opacity:1;transform:none}
+    .fbox{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="scan"></div>
+<div class="sweep"></div>
+
+<div class="chrome">
+  <div class="brk tl"></div><div class="brk tr"></div>
+  <div class="brk bl"></div><div class="brk br"></div>
+  <div class="rail l" id="railL"></div>
+  <div class="rail r" id="railR"></div>
+  <div class="stamp top">OBSERVATION LAYER / PASS 04</div>
+  <div class="stamp bot" id="clock">— — : — — : — —</div>
+</div>
+
+<div class="shell">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="heroArt" aria-hidden="true">
+      <svg viewBox="0 0 1400 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- horizon terrain -->
+        <path d="M0 520 L180 486 L330 508 L470 470 L610 500 L760 462 L900 496 L1060 468 L1210 502 L1400 474 L1400 620 L0 620Z" fill="#0D1B2C"/>
+        <path d="M0 552 L200 534 L400 556 L620 528 L820 552 L1040 530 L1260 554 L1400 536 L1400 620 L0 620Z" fill="#0B1725"/>
+        <!-- dish wireframe -->
+        <g stroke="#22E0F0" stroke-width="1" opacity=".42">
+          <ellipse cx="470" cy="250" rx="176" ry="58" transform="rotate(-19 470 250)"/>
+          <ellipse cx="470" cy="250" rx="128" ry="42" transform="rotate(-19 470 250)"/>
+          <ellipse cx="470" cy="250" rx="78" ry="26" transform="rotate(-19 470 250)"/>
+          <ellipse cx="470" cy="250" rx="30" ry="10" transform="rotate(-19 470 250)"/>
+          <path d="M300 194 L640 306M330 300 L610 200M470 192 L470 308"/>
+          <path d="M470 250 L486 400 M440 402 L534 402"/>
+          <path d="M486 400 L448 520 M486 400 L540 520"/>
+        </g>
+        <g stroke="#FF2D7A" stroke-width="1" opacity=".3">
+          <ellipse cx="474" cy="246" rx="176" ry="58" transform="rotate(-19 474 246)"/>
+          <path d="M296 300 L470 246 L644 302"/>
+        </g>
+        <!-- masts -->
+        <g stroke="#22E0F0" stroke-width="1" opacity=".3">
+          <path d="M900 500 L900 180M886 500 L900 180 L914 500"/>
+          <path d="M888 460 L912 460M886 420 L914 420M884 380 L916 380M882 340 L918 340M880 300 L920 300"/>
+          <circle cx="900" cy="176" r="4" fill="#FF2D7A" stroke="none"/>
+          <path d="M1120 508 L1120 300M1110 508 L1120 300 L1130 508"/>
+          <path d="M1112 470 L1128 470M1110 430 L1130 430M1108 390 L1132 390"/>
+          <path d="M212 512 L212 340M204 512 L212 340 L220 512"/>
+          <path d="M206 470 L218 470M204 430 L220 430"/>
+        </g>
+        <!-- chaotic annotation boxes -->
+        <g stroke="#FF2D7A" stroke-width="1" opacity=".22">
+          <rect x="286" y="150" width="382" height="180"/>
+          <rect x="330" y="192" width="180" height="96"/>
+          <rect x="842" y="150" width="128" height="360"/>
+          <rect x="1078" y="278" width="86" height="238"/>
+        </g>
+        <g stroke="#9BF03C" stroke-width="1" opacity=".2">
+          <rect x="252" y="126" width="452" height="230"/>
+          <rect x="864" y="256" width="82" height="120"/>
+        </g>
+        <!-- figure: CRT-headed observer -->
+        <g transform="translate(700,432) scale(1.06)">
+          <rect x="-15" y="-46" width="30" height="24" rx="2" fill="#D9E2E8" stroke="#8A9AA6"/>
+          <rect x="-11" y="-42" width="22" height="16" fill="#0A1626"/>
+          <rect x="-11" y="-42" width="22" height="16" fill="#22E0F0" opacity=".28"/>
+          <path d="M0 -46 L0 -60 M0 -60 L7 -66" stroke="#8A9AA6" stroke-width="1.4"/>
+          <circle cx="7" cy="-66" r="1.8" fill="#FF2D7A"/>
+          <path d="M-12 -22 L12 -22 L16 6 L-16 6 Z" fill="#E7EDF1" stroke="#9DAAB4"/>
+          <rect x="-22" y="-20" width="9" height="24" rx="3" fill="#DCE4E9" stroke="#9DAAB4"/>
+          <rect x="13" y="-20" width="9" height="24" rx="3" fill="#DCE4E9" stroke="#9DAAB4"/>
+          <rect x="-19" y="-18" width="7" height="18" fill="#98A6B0" opacity=".5"/>
+          <path d="M-11 6 L-12 34 L-5 34 L-3 8 Z" fill="#E7EDF1" stroke="#9DAAB4"/>
+          <path d="M11 6 L13 34 L6 34 L3 8 Z" fill="#E7EDF1" stroke="#9DAAB4"/>
+          <ellipse cx="0" cy="38" rx="26" ry="4" fill="#000" opacity=".38"/>
+        </g>
+        <g stroke="#9BF03C" stroke-width="1" opacity=".55">
+          <rect x="672" y="358" width="58" height="112"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="fbox" style="top:20%;left:4%;width:150px;height:88px;border-color:rgba(255,45,122,.4);color:rgba(255,45,122,.65);animation-delay:.5s" data-l="REG_04 / 0.61"></div>
+    <div class="fbox" style="top:58%;right:6%;width:118px;height:130px;border-color:rgba(34,224,240,.35);color:rgba(34,224,240,.6);animation-delay:.75s" data-l="MAST_B / 0.88"></div>
+    <div class="fbox" style="top:12%;right:20%;width:190px;height:62px;border-color:rgba(155,240,60,.28);color:rgba(155,240,60,.55);animation-delay:1s" data-l="SKY / NULL"></div>
+
+    <div class="kicker">SUBJECT ACQUIRED &mdash; <b>CONF 0.97</b> &middot; JACKSON, MS</div>
+    <h1><span class="aberr" id="h1a">TEMILOLUWA</span><span class="l2" id="h1b">ADESOLA</span></h1>
+    <div class="heroMeta">
+      <span><i class="c"></i>M.S. ELECTRICAL ENGINEERING &middot; JSU</span>
+      <span><i></i>HARDWARE &amp; TEST &middot; AUTONOMY</span>
+      <span><i class="m"></i>GRAD SPRING 2027</span>
+    </div>
+    <p class="heroLine">I build the parts that have to survive contact with the real world &mdash; sensors that go in the water, boards that ride on something moving, test rigs that catch the failure before the field does.</p>
+  </header>
+
+  <!-- ================= 01 ================= -->
+  <section class="sec" id="subject">
+    <div class="secHead rv"><span class="secNum">01 / SUBJECT</span><h2>What the system found</h2></div>
+    <div class="secRule rv"></div>
+    <p class="lede rv">I'm a hardware-first engineer finishing a master's in electrical engineering at Jackson State. My work sits where the sensor meets the water, the battery meets the motor, and the model meets a machine that actually has to run it.</p>
+    <p class="lede rv">Most of what I build starts as a question about whether something will hold up: will this enclosure survive a tidal cycle, will this pack deliver current under load, will this network still infer fast enough once it's off the workstation. The answers come from instrumenting things and watching them fail, not from the datasheet.</p>
+    <p class="lede rv">I'm aiming at hardware and test engineering roles in autonomous vehicles &mdash; the part of the stack where the perception system stops being a diagram and becomes something bolted to a moving object.</p>
+  </section>
+
+  <!-- ================= 02 ================= -->
+  <section class="sec" id="work">
+    <div class="secHead rv"><span class="secNum">02 / OBSERVATIONS</span><h2>Selected work</h2></div>
+    <div class="secRule rv"></div>
+
+    <div class="obsGrid">
+
+      <article class="obs rv" data-tag="BIO_SENSOR" data-conf="0.94">
+        <span class="cnr a"></span><span class="cnr b"></span><span class="cnr c"></span><span class="cnr d"></span>
+        <span class="obsTag"></span><span class="obsConf"></span>
+        <div class="obsTop">
+          <div>
+            <h3>Oyster Gaping Monitor</h3>
+            <div class="obsRole">Bio-integrated aquatic sensing &middot; field deployed</div>
+          </div>
+        </div>
+        <p class="obsBody">A sensor that rides on a living animal and reports how often it opens its shell &mdash; a direct read on water quality and stress. The hard part was never the measurement. It was building something that stays sealed, stays calibrated and keeps logging while it sits submerged in a tidal environment that wants to corrode, foul and flood it.</p>
+        <div class="chips"><span class="chip">EMBEDDED</span><span class="chip">SENSOR DESIGN</span><span class="chip">ENCLOSURE / SEALING</span><span class="chip">FIELD DEPLOYMENT</span><span class="chip">DATA LOGGING</span></div>
+      </article>
+
+      <article class="obs rv" data-tag="PERCEPTION" data-conf="0.91">
+        <span class="cnr a"></span><span class="cnr b"></span><span class="cnr c"></span><span class="cnr d"></span>
+        <span class="obsTag"></span><span class="obsConf"></span>
+        <div class="obsTop">
+          <div>
+            <h3>End-to-End Steering Net</h3>
+            <div class="obsRole">PilotNet reproduction &middot; edge inference</div>
+          </div>
+        </div>
+        <p class="obsBody">A reproduction of the classic camera-to-steering-angle convolutional network, rebuilt to understand what the architecture is actually doing rather than to chase a benchmark. The interesting work started after training: what happens to latency and accuracy when the same model has to run on hardware that fits in a vehicle instead of under a desk.</p>
+        <div class="chips"><span class="chip">CNN</span><span class="chip">AUTONOMY</span><span class="chip">EDGE INFERENCE</span><span class="chip">WAYMO OPEN DATASET</span></div>
+      </article>
+
+      <article class="obs rv" data-tag="DRIVETRAIN" data-conf="0.89">
+        <span class="cnr a"></span><span class="cnr b"></span><span class="cnr c"></span><span class="cnr d"></span>
+        <span class="obsTag"></span><span class="obsConf"></span>
+        <div class="obsTop">
+          <div>
+            <h3>Hoverboard Robot Platform</h3>
+            <div class="obsRole">Salvaged drivetrain &middot; student build program</div>
+          </div>
+        </div>
+        <p class="obsBody">Stripped hoverboards turned into a repeatable robot base: reuse the pack and its battery management, drive the hub motors with external BLDC controllers, put an ESP32 on top for control. Designed so several student teams could each build one without every group re-solving the same power and motor problems from scratch.</p>
+        <div class="chips"><span class="chip">BLDC</span><span class="chip">BMS / PACK REUSE</span><span class="chip">ESP32</span><span class="chip">POWER ELECTRONICS</span><span class="chip">MECHANICAL</span></div>
+      </article>
+
+      <article class="obs rv" data-tag="TOOLING" data-conf="0.86">
+        <span class="cnr a"></span><span class="cnr b"></span><span class="cnr c"></span><span class="cnr d"></span>
+        <span class="obsTag"></span><span class="obsConf"></span>
+        <div class="obsTop">
+          <div>
+            <h3>Release-to-Incident Intelligence</h3>
+            <div class="obsRole">Evidence-driven triage &middot; web tooling</div>
+          </div>
+        </div>
+        <p class="obsBody">When something breaks in production, the first question is always which change caused it. This is a dashboard that ties incidents back to the releases that preceded them and shows the evidence for the link, so triage becomes a matter of reading the record rather than trusting whoever remembers the most.</p>
+        <div class="chips"><span class="chip">REACT</span><span class="chip">DATA MODELING</span><span class="chip">INCIDENT TRIAGE</span></div>
+      </article>
+
+      <article class="obs rv" data-tag="OPEN_SRC" data-conf="0.82">
+        <span class="cnr a"></span><span class="cnr b"></span><span class="cnr c"></span><span class="cnr d"></span>
+        <span class="obsTag"></span><span class="obsConf"></span>
+        <div class="obsTop">
+          <div>
+            <h3>ros2_control_demos</h3>
+            <div class="obsRole">Upstream contribution &middot; robotics middleware</div>
+          </div>
+        </div>
+        <p class="obsBody">A fix contributed back to the ROS 2 control demos, in the frame-prefix handling that trips people up when they run more than one robot in the same namespace. Small change, but the kind that only surfaces once you've actually tried to bring up the stack yourself.</p>
+        <div class="chips"><span class="chip">ROS 2</span><span class="chip">C++</span><span class="chip">OPEN SOURCE</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section class="sec" id="systems">
+    <div class="secHead rv"><span class="secNum">03 / SYSTEMS</span><h2>Instrument list</h2></div>
+    <div class="secRule rv"></div>
+    <dl class="readout rv">
+      <div class="cell">
+        <dt>Hardware</dt>
+        <dd><span>Sensor &amp; analog front-end design</span><span>Battery packs, BMS, power electronics</span><span>BLDC / motor control</span><span>Enclosure &amp; environmental sealing</span></dd>
+      </div>
+      <div class="cell">
+        <dt>Embedded</dt>
+        <dd><span>ESP32, STM32, microcontroller firmware</span><span>I2C / SPI / UART bring-up</span><span>Data logging &amp; telemetry</span><span>ROS 2</span></dd>
+      </div>
+      <div class="cell">
+        <dt>Test &amp; Validation</dt>
+        <dd><span>Bench instrumentation</span><span>Field deployment &amp; recovery</span><span>Failure analysis</span><span>Calibration procedures</span></dd>
+      </div>
+      <div class="cell">
+        <dt>Compute</dt>
+        <dd><span>Python, C/C++</span><span>PyTorch, CNN training</span><span>Edge inference &amp; latency work</span><span>React, web tooling</span></dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- ================= 04 ================= -->
+  <section class="sec" id="contact">
+    <div class="tx rv">
+      <span class="txLabel">04 / TRANSMISSION</span>
+      <h2>Open a channel</h2>
+      <p>I'm looking for hardware and test engineering work in autonomy &mdash; internships now, full time from spring 2027. If you build things that have to survive being outside, I'd like to hear about it.</p>
+      <div class="links">
+        <a class="lk" href="https://github.com/IamTemmy" target="_blank" rel="noopener"><em>&rarr;</em> GITHUB / IAMTEMMY</a>
+        <a class="lk" href="#" target="_blank" rel="noopener"><em>&rarr;</em> LINKEDIN</a>
+        <a class="lk" href="#"><em>&rarr;</em> EMAIL</a>
+      </div>
+    </div>
+
+    <footer>
+      <span>OBSERVATION LAYER / BUILT AS A DESIGN STUDY</span>
+      <span id="footStamp">SIG. LOCK &mdash; STABLE</span>
+    </footer>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- telemetry rails ---------- */
+  var GLYPH = '0123456789ABCDEF//::..--<>[]{}=+*ΔΣΩ';
+  function noiseLine(n){
+    var s='';
+    for(var i=0;i<n;i++) s += GLYPH[Math.floor(Math.random()*GLYPH.length)];
+    return s;
+  }
+  function fillRail(el, rows){
+    var out=[];
+    for(var i=0;i<rows;i++){
+      var r = Math.random();
+      if(r<0.16) out.push('');
+      else if(r<0.34) out.push(noiseLine(4)+' '+noiseLine(6));
+      else out.push(noiseLine(Math.floor(6+Math.random()*10)));
+    }
+    el.textContent = out.join('\n');
+  }
+  var railL=document.getElementById('railL'), railR=document.getElementById('railR');
+  function refreshRails(){
+    if(!railL||!railR) return;
+    var rows = Math.floor((window.innerHeight-160)/16);
+    fillRail(railL, rows); fillRail(railR, rows);
+  }
+  refreshRails();
+  if(!reduce) setInterval(refreshRails, 2600);
+  window.addEventListener('resize', refreshRails);
+
+  /* ---------- clock stamp ---------- */
+  function tick(){
+    var d=new Date();
+    var p=function(n){return String(n).padStart(2,'0')};
+    var el=document.getElementById('clock');
+    if(el) el.textContent = p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())+' / LOCAL';
+  }
+  tick(); setInterval(tick,1000);
+
+  /* ---------- text scramble ---------- */
+  function scramble(el, finalText, dur){
+    if(reduce){ el.textContent = finalText; return; }
+    var frame=0, total=Math.max(10, Math.round((dur||600)/32));
+    var id=setInterval(function(){
+      frame++;
+      var progress = frame/total;
+      var out='';
+      for(var i=0;i<finalText.length;i++){
+        if(i/finalText.length < progress) out += finalText[i];
+        else out += GLYPH[Math.floor(Math.random()*GLYPH.length)];
+      }
+      el.textContent = out;
+      if(frame>=total){ clearInterval(id); el.textContent = finalText; }
+    },32);
+  }
+
+  /* ---------- reveal + detection ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el = e.target;
+      el.classList.add('in');
+      if(el.classList.contains('obs') && !el.dataset.done){
+        el.dataset.done='1';
+        el.classList.add('det');
+        var tag = el.querySelector('.obsTag');
+        var conf = el.querySelector('.obsConf');
+        setTimeout(function(){ scramble(tag, el.dataset.tag, 520); },120);
+        setTimeout(function(){ scramble(conf, 'CONF '+el.dataset.conf, 460); },300);
+      }
+      io.unobserve(el);
+    });
+  },{threshold:0.18, rootMargin:'0px 0px -60px 0px'});
+
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  /* ---------- occasional headline glitch ---------- */
+  var h1a=document.getElementById('h1a'), h1b=document.getElementById('h1b');
+  function pulse(){
+    if(reduce) return;
+    var t = Math.random()<0.5 ? h1a : h1b;
+    t.classList.add('glitching');
+    if(t===h1b) t.classList.add('aberr');
+    setTimeout(function(){
+      t.classList.remove('glitching');
+      if(t===h1b) t.classList.remove('aberr');
+    }, 560);
+    setTimeout(pulse, 3200 + Math.random()*5200);
+  }
+  setTimeout(pulse, 2400);
+
+  /* ---------- footer signal chatter ---------- */
+  var states=['SIG. LOCK — STABLE','SIG. LOCK — DRIFT 0.02','RE-ACQUIRING','SIG. LOCK — STABLE','CARRIER NOMINAL'];
+  var fs=document.getElementById('footStamp'), si=0;
+  if(!reduce) setInterval(function(){
+    si=(si+1)%states.length;
+    scramble(fs, states[si], 420);
+  }, 5200);
+})();
+</script>
+
+</body>
+</html>
