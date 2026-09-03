@@ -1,42 +1,43 @@
-# design-lab
+# Design Lab
 
-Frontend design studies. Each folder is one concept: something I saw and wanted to understand,
-rebuilt until I knew how it worked.
+Design Lab is a collection of interaction experiments by Temiloluwa Adesola.
 
-The point isn't to ship products. It's to get better at making interfaces that feel like a place
-rather than a page — and to keep a record of what each attempt taught me, including the ones that
-didn't work.
+Each study starts with one question, isolates one memorable behavior, and pushes it until the
+result is useful beyond the page that introduced it. The work is not a gallery of website clones;
+it is a record of learning how visual ideas become responsive systems.
 
-Every study ships with a writeup: what the reference was, what decisions I made and why, what
-failed, and what technique came out of it worth reusing.
+## Operating rule
 
----
+A study is complete only when it has:
+
+1. one clear **What if?** question;
+2. one signature interaction;
+3. a polished, responsive live experience;
+4. a reusable technique or piece of code; and
+5. an honest process note covering decisions, failures, and the final result.
 
 ## Studies
 
-### [01 — Observation Layer](./01-observation-layer/)
+### 001 — Observation Engine
 
-An engineer's portfolio built as a machine perception pass — the site classifies its own subject
-and annotates each project with bounding boxes and confidence scores.
+**What if a webpage could observe and interpret itself?**
 
-Two passes: a fully hand-drawn SVG version, then a rebuild using photographic material with the
-detection layer over the top. The gap between them is the lesson.
+A user-controlled scan plane reads the real positions of interface objects. Content is classified
+only when the scan reaches it; confidence grows through repeated observation, and RGB, edge,
+depth, and semantic modes expose different representations of the same page.
 
-`Saira Condensed / Space Grotesk / Space Mono` · `IntersectionObserver` · `text scramble` ·
-`chromatic aberration` · in progress
+- [Open the experiment](./dist/01-observation-engine/)
+- [Read the study](./studies/01-observation-engine/)
 
----
+## Repository structure
 
-## Working notes
+```text
+dist/                         Published Design Lab experience
+studies/                      Briefs, notes, and process artifacts
+  01-observation-engine/
+01-observation-layer/         Earlier passes retained as evidence
+```
 
-Recurring lessons, updated as they accumulate:
-
-- **A treatment beats a hero object.** Concepts that apply a lens over real content hold up
-  better than concepts built around one impressive centrepiece, because the content stays
-  load-bearing and the styling has something to act on.
-- **Match the medium to the reference.** If a reference's power comes from photographic depth,
-  vectors won't get there. Photographs do atmosphere and texture; code does interaction and state.
-  Deciding which does what should happen before building, not after.
-- **Structure should encode something true.** Section numbering, labels and dividers earn their
-  place when they describe the content's actual shape. Otherwise they're decoration wearing a
-  system's clothes.
+The two original Observation Layer builds remain in `01-observation-layer/`. They established the
+machine-perception direction, but treated detection as decoration. Observation Engine rebuilds
+the concept so the interaction itself performs the classification.

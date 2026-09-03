@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A webpage that discovers its own interface through a user-controlled scan.">
+  <title>001 — Observation Engine · Design Lab</title>
+  <link rel="stylesheet" href="./engine.css">
+</head>
+<body data-mode="semantic">
+  <header class="topbar">
+    <a href="../" class="back" aria-label="Back to Design Lab">DL / 001</a>
+    <div class="title-lockup">
+      <strong>Observation Engine</strong>
+      <span>Acquisition surface</span>
+    </div>
+    <div class="system-state"><i></i><span id="systemState">Awaiting input</span></div>
+  </header>
+
+  <main class="workspace">
+    <aside class="controls" aria-label="Observation controls">
+      <div>
+        <p class="panel-number">A / Representation</p>
+        <h1>A page that<br>looks back.</h1>
+        <p class="brief">Move across the field. Objects are classified only when the scan reaches them.</p>
+      </div>
+
+      <fieldset class="modes">
+        <legend>Signal mode</legend>
+        <button type="button" data-mode="rgb" aria-pressed="false"><span>01</span> RGB</button>
+        <button type="button" data-mode="edge" aria-pressed="false"><span>02</span> Edge</button>
+        <button type="button" data-mode="depth" aria-pressed="false"><span>03</span> Depth</button>
+        <button type="button" data-mode="semantic" aria-pressed="true"><span>04</span> Semantic</button>
+      </fieldset>
+
+      <button class="reset" id="resetButton" type="button">Clear observations <span>↺</span></button>
+    </aside>
+
+    <section class="instrument" aria-labelledby="field-title">
+      <div class="instrument-bar">
+        <span id="field-title">Live acquisition field</span>
+        <span>Pointer / touch / ← →</span>
+      </div>
+
+      <div class="stage" id="stage" tabindex="0" role="region" aria-label="Interactive acquisition field" aria-describedby="stageHelp">
+        <div class="stage-grid" aria-hidden="true"></div>
+        <div class="spectrum" aria-hidden="true"></div>
+        <div class="scan-plane" id="scanPlane" aria-hidden="true"><span></span></div>
+
+        <article class="object signal" data-object data-label="VALVE_SIGNAL" data-class="biosensor" data-depth="near" data-base="0.74">
+          <div class="object-head"><span>Channel 07</span><span>14.2 mV</span></div>
+          <svg viewBox="0 0 400 120" role="img" aria-label="Oyster valve sensor waveform">
+            <path class="trace ghost" d="M0 78 C28 76 36 48 58 50 S90 88 112 69 S146 18 171 45 S205 92 231 67 S267 37 286 48 S326 80 350 54 S376 38 400 44"/>
+            <path class="trace live" d="M0 78 C28 76 36 48 58 50 S90 88 112 69 S146 18 171 45 S205 92 231 67 S267 37 286 48 S326 80 350 54 S376 38 400 44"/>
+            <line x1="0" y1="92" x2="400" y2="92"/>
+          </svg>
+          <div class="object-foot"><strong>Oyster gape</strong><span>Field sensor / MS Gulf</span></div>
+        </article>
+
+        <article class="object trajectory" data-object data-label="EGO_TRAJECTORY" data-class="motion" data-depth="mid" data-base="0.79">
+          <div class="object-head"><span>Scenario 00481</span><span>8.0 s</span></div>
+          <svg viewBox="0 0 360 210" role="img" aria-label="Vehicle trajectory paths">
+            <path class="road" d="M-20 184 C72 156 112 112 152 74 S246 22 382 40"/>
+            <path class="road thin" d="M-8 210 C78 170 126 134 169 96 S262 46 382 66"/>
+            <path class="candidate one" d="M36 178 C99 148 126 112 164 80 S246 36 330 43"/>
+            <path class="candidate two" d="M36 178 C94 151 132 127 172 104 S247 72 326 74"/>
+            <circle cx="36" cy="178" r="7"/>
+            <circle cx="164" cy="80" r="3"/>
+            <circle cx="330" cy="43" r="3"/>
+          </svg>
+          <div class="object-foot"><strong>Trajectory verification</strong><span>Observed / predicted</span></div>
+        </article>
+
+        <article class="object moisture" data-object data-label="ROOT_ZONE" data-class="control" data-depth="far" data-base="0.68">
+          <div class="object-head"><span>Loop 02</span><span>Stable</span></div>
+          <div class="gauge" aria-label="Soil moisture 63 percent">
+            <span class="gauge-value">63<small>%</small></span>
+          </div>
+          <div class="object-foot"><strong>Root-zone moisture</strong><span>Pump inhibited</span></div>
+        </article>
+
+        <article class="object packet" data-object data-label="DATA_PACKET" data-class="telemetry" data-depth="near" data-base="0.71">
+          <div class="packet-id">7F 2A 09 C1</div>
+          <div class="packet-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span>Checksum valid</span>
+        </article>
+
+        <p class="stage-help" id="stageHelp">Move your pointer or use the left and right arrow keys to scan.</p>
+      </div>
+    </section>
+
+    <aside class="telemetry" aria-label="Observation telemetry">
+      <div class="telemetry-head">
+        <p class="panel-number">B / Evidence</p>
+        <div class="metric"><strong id="detectionCount">0</strong><span>objects acquired</span></div>
+      </div>
+
+      <dl class="coordinates">
+        <div><dt>Scan X</dt><dd id="scanValue">12.0%</dd></div>
+        <div><dt>Mode</dt><dd id="modeValue">SEMANTIC</dd></div>
+        <div><dt>Field</dt><dd id="fieldValue">— × —</dd></div>
+      </dl>
+
+      <div class="log-wrap">
+        <div class="log-head"><span>Observation log</span><span>Live</span></div>
+        <ol id="eventLog" class="event-log" aria-live="polite">
+          <li class="empty">No objects classified.</li>
+        </ol>
+      </div>
+
+      <div class="legend">
+        <span><i class="biosensor"></i>Biosensor</span>
+        <span><i class="motion"></i>Motion</span>
+        <span><i class="control"></i>Control</span>
+        <span><i class="telemetry-key"></i>Telemetry</span>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footnote">
+    <span>Question 001</span>
+    <p>What if a webpage could observe and interpret itself?</p>
+    <a href="https://github.com/IamTemmy/design-lab/tree/main/studies/01-observation-engine">Process notes ↗</a>
+  </footer>
+
+  <script src="./engine.js"></script>
+</body>
+</html>
